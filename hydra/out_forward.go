@@ -18,6 +18,7 @@ type OutForward struct {
 const (
 	serverHealthCheckInterval = 3 * time.Second
 	maxKeepAliveSentCount     = 100
+	maxKeepAliveDuration      = 30 * time.Second
 )
 
 // OutForward ... recieve FluentRecordSet from channel, and send it to passed loggers until success.
@@ -104,7 +105,8 @@ func (f *OutForward) outForwardRecieve() error {
 				Sents:    1,
 			}
 			f.sent++
-			if logger.Sent%maxKeepAliveSentCount == 0 {
+			if logger.Sent%maxKeepAliveSentCount == 0 ||
+				time.Now().After(logger.ConnAt.Add(maxKeepAliveDuration)) {
 				logger.RefreshConnection()
 			}
 			return nil // success

@@ -57,6 +57,7 @@ type Fluent struct {
 	mu              sync.Mutex
 	lastError       error
 	lastErrorAt     time.Time
+	ConnAt          time.Time
 	Sent            int64
 }
 
@@ -152,6 +153,9 @@ func (f *Fluent) connect() (err error) {
 	resolved := fmt.Sprintf(format, addr, port)
 	log.Printf("[info] Connect to %s (%s)", f.Server, resolved)
 	f.conn, err = net.DialTimeout("tcp", resolved, f.Config.Timeout)
+	if err != nil {
+		f.ConnAt = time.Now()
+	}
 	f.recordError(err)
 	return
 }
